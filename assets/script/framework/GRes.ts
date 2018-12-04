@@ -8,10 +8,10 @@
 //  - [Chinese] http://docs.cocos.com/creator/manual/zh/scripting/life-cycle-callbacks.html
 //  - [English] http://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
 
-const {ccclass, property} = cc._decorator;
+const { ccclass, property } = cc._decorator;
 /** 配置参数 */
 const GP = {
-    FAKE_PATH: '__fake_path__',
+  FAKE_PATH: '__fake_path__',
 }
 Object.freeze(GP)
 
@@ -21,8 +21,8 @@ export default class GRes extends cc.Component {
 
   static ins: GRes
 
-  onLoad () {
-      GRes.ins = this
+  onLoad() {
+    GRes.ins = this
   }
 
   array_fake: any[] = []
@@ -31,6 +31,29 @@ export default class GRes extends cc.Component {
   async load_chain() {
     this.array_fake = await GRes.load_res_dir(GP.FAKE_PATH, cc.Prefab)
     console.log('this.array_fake.....', this.array_fake)
+  }
+
+  /**
+   * 载入单个资源
+   * - 输出log
+   * @param path 
+   * @param type 
+   * @static
+   * @async
+  */
+  static async load_res(path: string, type: typeof cc.Asset) {
+    return await new Promise((resolve, reject) => {
+      cc.loader.loadRes(path, type, (err, res) => {
+        // 载入失败
+        if (err) {
+          cc.error(`[MRes] resource load fail,path=${path},type=${type},error=${err}`)
+          reject()
+          return
+        }
+        // 载入成功
+        resolve(res)
+      })
+    })
   }
 
   /**

@@ -22,22 +22,25 @@ Object.freeze(_Data)
 export default class NewClass extends cc.Component {
 
   onLoad () {
+    console.log('onLoad执行')
     this.adjust_screen()
   }
 
   async start () {
+    console.log('start执行')
     await GRes.ins.load_chain()
     console.log('载入连成功')
     GLD.is_init = false
     this.inin_local_data()
     this.init_test_local_data()
-    this.flag_loading += 1
     // 载入进度条
     this.pb.progress = 0
     GGM.run_by_each_frame(()=>{
       this.pb.progress +=1 / _Data.FAKE_FRAME
       console.log('this.pb.progress', this.pb.progress)
-      if (this.pb.progress >= 1) { this.flag_loading += 1 }
+      if (this.pb.progress >= 1) { 
+        this.flag_loading = 2
+      }
     },this,_Data.FAKE_FRAME)
   }
 
@@ -51,6 +54,7 @@ export default class NewClass extends cc.Component {
   }
   set flag_loading(v) {
     this._flag_loading = v
+    console.log('设置进度值，类似于watch', v)
     if (v === 2) { 
       this.panel_loading_close() 
     }
@@ -75,13 +79,10 @@ export default class NewClass extends cc.Component {
   */
   panel_loading_close() {
     this.scheduleOnce(
-      () => {
-        GPanel.out_fade(this.panel_loading, _Data.LAODING_FADE_TIME, cc.easeCircleActionInOut()).then(
-          () => {
-            this.panel_loading.active = false
-            GPanel.chain('PanelTest', 'PanelTest')
-          }
-        )
+      async () => {
+        await GPanel.out_fade(this.panel_loading, _Data.LAODING_FADE_TIME, cc.easeCircleActionInOut())
+        this.panel_loading.active = false
+        GPanel.chain('PanelTest', 'PanelTest')
       },_Data.FAKE_DELAY
     )
   }
@@ -126,8 +127,10 @@ export default class NewClass extends cc.Component {
     now_screen_radio: number = cc.winSize.height / cc.winSize.width
     )
   {
+    console.log('onload执行开始')
     canvas.fitHeight = !(now_screen_radio > design_screen_radio)
     canvas.fitWidth = now_screen_radio > design_screen_radio
     canvas.alignWithScreen() //!! 本方法不在代码提示中，也不在文档中，但是就是不能删除，只能说一句666；我都忘记自己为啥要写这一串代码。。。
+    console.log('onload执行结束')
   }
 }
