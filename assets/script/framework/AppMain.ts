@@ -1,16 +1,8 @@
-// Learn TypeScript:
-//  - [Chinese] http://docs.cocos.com/creator/manual/zh/scripting/typescript.html
-//  - [English] http://www.cocos2d-x.org/docs/creator/manual/en/scripting/typescript.html
-// Learn Attribute:
-//  - [Chinese] http://docs.cocos.com/creator/manual/zh/scripting/reference/attributes.html
-//  - [English] http://www.cocos2d-x.org/docs/creator/manual/en/scripting/reference/attributes.html
-// Learn life-cycle callbacks:
-//  - [Chinese] http://docs.cocos.com/creator/manual/zh/scripting/life-cycle-callbacks.html
-//  - [English] http://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
 import GRes from './GRes'
 import GLD from './GLD'
 import GLanguage from './tools/i18n/GLanguage'
 import GPanel from './GPanel'
+import GGM from './GGM'
 
 const {ccclass, property} = cc._decorator
 
@@ -29,25 +21,24 @@ Object.freeze(_Data)
 @ccclass
 export default class NewClass extends cc.Component {
 
-  @property(cc.Label)
-  label: cc.Label = null;
-
-  @property
-  text: string = 'hello';
-
-  // LIFE-CYCLE CALLBACKS:
-
   onLoad () {
     this.adjust_screen()
   }
 
   async start () {
-      await GRes.ins.load_chain()
-      // 这边有个问题，GLD里边都是方法 没有参数 这边却是可以使用is_init这个值得
-      GLD.is_init = false
-      this.inin_local_data()
-      this.init_test_local_data()
-      this.flag_loading += 1
+    await GRes.ins.load_chain()
+    console.log('载入连成功')
+    GLD.is_init = false
+    this.inin_local_data()
+    this.init_test_local_data()
+    this.flag_loading += 1
+    // 载入进度条
+    this.pb.progress = 0
+    GGM.run_by_each_frame(()=>{
+      this.pb.progress +=1 / _Data.FAKE_FRAME
+      console.log('this.pb.progress', this.pb.progress)
+      if (this.pb.progress >= 1) { this.flag_loading += 1 }
+    },this,_Data.FAKE_FRAME)
   }
 
   /** 
@@ -72,6 +63,10 @@ export default class NewClass extends cc.Component {
   /** 游戏Loading界面 */
   @property(cc.Node)
   panel_loading: cc.Node = null
+
+  /** 游戏Loading界面进度条 */
+  @property(cc.ProgressBar)
+  pb: cc.ProgressBar = null
 
   /**
   * loading界面关闭动画、关闭逻辑
